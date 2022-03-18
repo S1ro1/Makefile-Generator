@@ -1,0 +1,60 @@
+print_help ()
+{
+    echo 'A simple makefile generator by Siro'
+    echo "Usage:"
+    echo -e "\t-h: Prints help"
+    echo -e "\t-c [OPTION]: sets a compiler to the option"
+    echo -e "\t-p [OPTION]: sets a language, supported options are 'c' and 'cpp'"
+    echo -e "\t-*: Everything else preceeded by dash becomes a compiler flags, default ones are -std=c99 -Wall -Wextra"
+    echo -e "\t[OPTION]: File name, input filenames have to be without suffix"
+}
+
+generate () 
+{
+    touch makefile
+    DEFAULT_FLAGS="-std=c99 -Wall -Wextra"
+    FLAGS=""
+    DEFAULT_COMPILER="gcc"
+    COMPILER=""
+    POSTFIX="c" 
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+        -h)
+            print_help
+            shift
+            ;;
+        -c)
+            COMPILER="$2"
+            shift
+            shift
+            ;;
+        -p)
+            POSTFIX="$2"
+            shift
+            shift
+            ;;
+        -*)
+            FLAGS="$FLAGS $1"
+            shift
+            ;;
+        *)
+            FILE_NAME="$1"
+            shift
+            ;;
+        esac
+    done
+    
+    if [ "$FLAGS" ]; then
+        DEFAULT_FLAGS=$FLAGS
+    fi
+
+    if [ "$COMPILER" ]; then
+        DEFAULT_COMPILER=$COMPILER
+    fi
+
+    echo "all: $FILE_NAME.$POSTFIX" > makefile
+    echo -e "\t$DEFAULT_COMPILER $DEFAULT_FLAGS $FILE_NAME.$POSTFIX -o $FILE_NAME\n" >> makefile
+
+    echo "clean:" >> makefile
+    echo -e "\trm $FILE_NAME" >> makefile
+}
