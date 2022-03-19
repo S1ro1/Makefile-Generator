@@ -11,7 +11,7 @@ $ cat makefile_gen >> .bashrc && rm makefile_gen
 
 ## Usage
 
-#### To use this generator, simply write generate into you shell and specify options
+#### To use this generator, simply write generate into your shell and specify options
 
 * -h: Prints help
 * -c [OPTION]: sets compiler to a specified option, default is gcc
