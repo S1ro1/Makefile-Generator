@@ -4,9 +4,8 @@ print_help ()
     echo "Usage:"
     echo -e "\t-h: Prints help"
     echo -e "\t-c [OPTION]: sets a compiler to the option"
-    echo -e "\t-p [OPTION]: sets a language, supported options are 'c' and 'cpp'"
+    echo -e "\t-t [OPTION]: sets a target name for the executable to be created"
     echo -e "\t-*: Everything else preceeded by dash becomes a compiler flags, default ones are -std=c99 -Wall -Wextra"
-    echo -e "\t[OPTION]: File name, input filenames have to be without suffix"
 }
 
 generate () 
