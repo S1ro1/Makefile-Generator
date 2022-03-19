@@ -16,7 +16,9 @@ generate ()
     FLAGS=""
     DEFAULT_COMPILER="gcc"
     COMPILER=""
-    POSTFIX="c" 
+    OBJECT_FILES=""
+    STRIPPED_FILE=""
+    SUFFIXED_FILE=""
     while [ "$#" -gt 0 ]; do
         case "$1" in
         -h)
@@ -28,8 +30,8 @@ generate ()
             shift
             shift
             ;;
-        -p)
-            POSTFIX="$2"
+        -t)
+            FILE_NAME="$2"
             shift
             shift
             ;;
@@ -37,15 +39,19 @@ generate ()
             FLAGS="$FLAGS $1"
             shift
             ;;
+        #*.o)
+            #OBJECT_FILES="$OBJECT_FILES $1"
+            #shift
+            #;;
         *)
-            FILE_NAME="$1"
-            shift
+            print_help
+            return
             ;;
         esac
     done
 
     if [ -z "$FILE_NAME" ]; then
-        echo "No file provided"
+        echo "No target provided"
         return
     fi
     
@@ -56,13 +62,31 @@ generate ()
     if [ "$COMPILER" ]; then
         DEFAULT_COMPILER=$COMPILER
     fi
+
+    if [ -z "$OBJECT_FILES" ]; then
+        for file in "$PWD"/*; do
+            if [[ $file == *.c ]]; then
+                STRIPPED_FILE="${file%.c}"
+                SUFFIXED_FILE="$STRIPPED_FILE.o"
+                OBJECT_FILES="$OBJECT_FILES ${SUFFIXED_FILE##*/}"
+            fi
+        done
+    fi
     
     echo "CC=$DEFAULT_COMPILER" > makefile
     echo -e "CFLAGS=$DEFAULT_FLAGS\n" >> makefile
+    echo -e "OBJS=$OBJECT_FILES" >> makefile
+    echo -e "TARGET=$FILE_NAME\n" >> makefile
 
-    echo "all: $FILE_NAME.$POSTFIX" >> makefile
-    echo -e "\t\$(CC) \$(CFLAGS) $FILE_NAME.$POSTFIX -o $FILE_NAME\n" >> makefile
+    echo -e "%.o: %.c" >> makefile
+    echo -e "\t\$(CC) \$(CFLAGS) -c \$^ -o \$@\n" >> makefile
 
-    echo "clean:" >> makefile
-    echo -e "\trm $FILE_NAME" >> makefile
+    echo -e "\$(TARGET): \$(OBJS)" >> makefile
+    echo -e "\t\$(CC) -o \$@ \$(OBJS) \$(LDFLAGS)\n" >> makefile
+
+    echo -e "clean:" >> makefile
+    echo -e "\t rm \$(OBJS) \$(TARGET)\n" >> makefile
+
+    echo -e "-include \$(OBJS:.o=.d)" >> makefile
+
 }
